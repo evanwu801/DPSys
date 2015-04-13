@@ -46,24 +46,49 @@ getHandler["/list"]=list;
 
 function listView(req, res) {
 	var sendData = {};
-		console.log("use api");
-		db.open(function() {
-			db.collection('api', function(err, collection){
-				var cursor = collection.find({});
-				cursor.each(function(err, doc){
-					if(doc != null){
-						console.log(doc);
-						sendData[doc.apiName]= doc;
-					} else{
-						db.close();
-						console.log(sendData);
-						res.send(sendData);
-					}
-				});
-			})
+	console.log("use api");
+	db.open(function() {
+		db.collection('api', function(err, collection){
+			var cursor = collection.find({});
+			cursor.each(function(err, doc){
+				if(doc != null){
+					console.log(doc);
+					sendData[doc.apiName]= doc;
+				} else{
+					db.close();
+					console.log(sendData);
+					res.render('apilist',{
+						 pagename: "API List",
+						 apiList: sendData
+					});
+				}
+			});
+		})
+	});
+}
+getHandler["/listview"]=listView;
+
+
+function register(req, res){
+	console.log("use api");
+	var sendData = {};
+	db.open(function() {
+		db.collection('api', function(err, collection){
+			var cursor = collection.insert(req.body, function(err,data){
+				if (data) {
+	                console.log('Successfully Insert');
+	                sendData["state"] = "success";
+	            } else {
+	                console.log('Failed to Insert');
+	                sendData["state"] = "fail";
+	            }
+				sendData["date"] = new Date();
+				res.send(sendData);
+			});
 		});
-	}
-	getHandler["/listview"]=listView;
+	});
+}
+postHandler["/register"] = register;
 
 exports.getHandler = getHandler;
 exports.postHandler = postHandler;
